@@ -20,20 +20,6 @@ node *make_node(int v, node *q)
   return p;
 }
 
-/* free all nodes in the list p */
-// problem with sentinel nodes having different addresses here and in main.cpp
-// p will point to something random after this, not sentinel. So SegFaults.
-// void free_list(node *p)
-// {
-//   node *q = p;
-//   while (q != &SENTINEL_node)
-//   {
-//     node *t = q->next;
-//     free(q);
-//     q = t;
-//   }
-// }
-
 // this deletes everything and sets to null. Would have the advantage of not using memory for a sentinel node, but oh well.
 void free_list(node **p)
 {

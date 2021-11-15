@@ -46,11 +46,19 @@ struct tree_node *Remove(int x, struct tree_node *t)
   if (Empty(t))
     return t;
 
-  // 2) If we have found the target to be removed. We do something.
+  // 2) If target x is smaller than present node, try again with left subtree.
+  if (x < t->item)
+    t->left = Remove(x, t->left);
+
+  // 3) If target x is larger than present node, try again with right subtree.
+  if (x > t->item)
+    t->right = Remove(x, t->right);
+
+  // 4) If we have found the target to be removed. We do something.
   if (x == t->item)
   {
 
-    // 2a) If the tree has no children
+    // 4a) If the tree has no children
     if (!(t->right) && !(t->left))
     {
       free(t);
@@ -58,50 +66,40 @@ struct tree_node *Remove(int x, struct tree_node *t)
       return NULL;
     }
 
-    // 2b) The tree has 2 children
+    // 4b) The tree has 2 children
     else if (t->right && t->left)
     {
-      struct tree_node *left_tmp = t->left;
-      struct tree_node *original_right = t->right;
-
-      // we copy everything from the left subtree to the target.
-      t->item = left_tmp->item;
-      t->left = left_tmp->left;
-      t->right = left_tmp->right;
-
       // we know that whatever was to the right originally is larger than anything present on the left.
-      // We find the largest node by going all the way to the right and then we affix the original right tree.
-      // Then we remove the temporary left child of the target, effectively deleting target.
-      struct tree_node *i = t;
-      while (i->right)
+      // meaning that we can find the largest value on the left subtree and push the value up instead of deleting
+      // whatever node
+
+      // we have a pointer i point to left subtree.
+      struct tree_node *i = t->left;
+      while (i->right) // we go all the way to the right
         i = i->right;
-      i->right = original_right;
-      free(left_tmp);
+
+      // We update value here.
+      t->item = i->item;
+
+      // then we call the function to remove whatever value we copied from the subtree.
+      // we already handled removing leaf nodes after all.
+      // We know the node is in left subtree.
+      t->left = Remove(t->item, t->left);
     }
-    // 2c) 1 child
+    // 4c) 1 child
     else
     {
       struct tree_node *child;
       // have child point to whichever subtree that exists
       (t->left) ? (child = t->left) : (child = t->right);
 
-      // copy child onto the target.
-      t->item = child->item;
-      t->left = child->left;
-      t->right = child->right;
+      // kill the current subtree
+      free(t);
 
-      // kill child.
-      free(child);
+      // instead we have it branch to the only child
+      return child;
     }
   }
-
-  // 3) If target x is smaller than present node, try again with left subtree.
-  if (x < t->item)
-    t->left = Remove(x, t->left);
-
-  // 4) If target x is larger than present node, try again with right subtree.
-  if (x > t->item)
-    t->right = Remove(x, t->right);
 
   // 5) Return entire tree.
   return t;
